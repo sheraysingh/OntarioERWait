@@ -11,9 +11,12 @@ import {
   RefreshControl,
   Alert,
   ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 
 // Conditional import for expo-location (not available on web)
 let Location: any = null;
@@ -61,15 +64,43 @@ class EstimatedTravelTimeProvider implements TravelTimeProvider {
   }
 }
 
-// Future: Can add RealRoutingTimeProvider that calls OpenRouteService or Google Maps API
-// class RealRoutingTimeProvider implements TravelTimeProvider {
-//   async calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number> {
-//     // Call routing API here
-//     return travelTime;
-//   }
-// }
-
 const travelTimeProvider: TravelTimeProvider = new EstimatedTravelTimeProvider();
+
+// Validate Ontario postal code format (K1A 0B1)
+function validateOntarioPostalCode(postalCode: string): boolean {
+  // Ontario postal codes start with K, L, M, N, or P
+  const ontarioPostalRegex = /^[KLMNP][0-9][A-Z]\s?[0-9][A-Z][0-9]$/i;
+  return ontarioPostalRegex.test(postalCode.trim());
+}
+
+// Geocode postal code to coordinates using a free service
+async function geocodePostalCode(postalCode: string): Promise<Coordinates | null> {
+  try {
+    // Using Nominatim (OpenStreetMap) free geocoding service
+    const formattedPostalCode = postalCode.trim().replace(/\s+/g, '+');
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?postalcode=${formattedPostalCode}&country=Canada&format=json&limit=1`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Geocoding failed');
+    }
+    
+    const data = await response.json();
+    
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon),
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error geocoding postal code:', error);
+    return null;
+  }
+}
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
@@ -94,11 +125,20 @@ export default function Index() {
       };
       setUserLocation(defaultLocation);
       setLocationPermission(true);
+      setLocationSource('gps');
       fetchNearbyHospitals(defaultLocation.coords.latitude, defaultLocation.coords.longitude);
     } else {
       requestLocationPermission();
     }
   }, []);
+
+  // Re-sort when sort mode changes
+  useEffect(() => {
+    if (hospitals.length > 0) {
+      const sorted = sortHospitals([...hospitals], sortMode);
+      setHospitals(sorted);
+    }
+  }, [sortMode]);
 
   const requestLocationPermission = async () => {
     try {
@@ -106,21 +146,16 @@ export default function Index() {
       setLocationPermission(status === 'granted');
       
       if (status === 'granted') {
+        setLocationSource('gps');
         await getUserLocationAndFetchHospitals();
       } else {
         setLoading(false);
-        Alert.alert(
-          'Location Permission Required',
-          'This app needs your location to find nearby emergency rooms.',
-          [
-            { text: 'Cancel', style: 'cancel', onPress: () => setLoading(false) },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
-          ]
-        );
+        setShowPostalCodeInput(true);
       }
     } catch (error) {
       console.error('Error requesting location permission:', error);
       setLoading(false);
+      setShowPostalCodeInput(true);
     }
   };
 
@@ -135,6 +170,33 @@ export default function Index() {
       console.error('Error getting location:', error);
       Alert.alert('Error', 'Unable to get your current location');
       setLoading(false);
+      setShowPostalCodeInput(true);
+    }
+  };
+
+  const handlePostalCodeSubmit = async () => {
+    if (!validateOntarioPostalCode(postalCode)) {
+      Alert.alert('Invalid Postal Code', 'Please enter a valid Ontario postal code (e.g., K1A 0B1)');
+      return;
+    }
+
+    setLoading(true);
+    const coordinates = await geocodePostalCode(postalCode);
+    
+    if (coordinates) {
+      const location = {
+        coords: {
+          latitude: coordinates.lat,
+          longitude: coordinates.lng,
+        },
+      };
+      setUserLocation(location);
+      setLocationSource('postal');
+      setShowPostalCodeInput(false);
+      await fetchNearbyHospitals(coordinates.lat, coordinates.lng);
+    } else {
+      setLoading(false);
+      Alert.alert('Error', 'Unable to find coordinates for this postal code. Please try again.');
     }
   };
 
@@ -148,14 +210,53 @@ export default function Index() {
         throw new Error('Failed to fetch hospitals');
       }
       
-      const data = await response.json();
-      setHospitals(data);
+      const data: Hospital[] = await response.json();
+      
+      // Calculate travel time for each hospital
+      const hospitalsWithTravelTime = await Promise.all(
+        data.map(async (hospital) => {
+          const travelTime = await travelTimeProvider.calculateTravelTime(
+            { lat, lng },
+            hospital.coordinates,
+            hospital.distance || 0
+          );
+          
+          return {
+            ...hospital,
+            travelTimeMinutes: travelTime,
+            totalTimeMinutes: travelTime + hospital.currentWaitTime,
+          };
+        })
+      );
+      
+      // Sort based on current sort mode
+      const sorted = sortHospitals(hospitalsWithTravelTime, sortMode);
+      setHospitals(sorted);
     } catch (error) {
       console.error('Error fetching hospitals:', error);
       Alert.alert('Error', 'Unable to fetch nearby hospitals');
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const sortHospitals = (hospitalList: Hospital[], mode: SortMode): Hospital[] => {
+    const sorted = [...hospitalList];
+    
+    switch (mode) {
+      case 'travelTime':
+        // Sort by shortest travel time
+        return sorted.sort((a, b) => (a.travelTimeMinutes || 0) - (b.travelTimeMinutes || 0));
+      
+      case 'waitTime':
+        // Sort by shortest wait time
+        return sorted.sort((a, b) => a.currentWaitTime - b.currentWaitTime);
+      
+      case 'combined':
+      default:
+        // Sort by total time (travel + wait)
+        return sorted.sort((a, b) => (a.totalTimeMinutes || 0) - (b.totalTimeMinutes || 0));
     }
   };
 
@@ -208,6 +309,17 @@ export default function Index() {
     return '#EF4444'; // Red
   };
 
+  const getSortModeLabel = (): string => {
+    switch (sortMode) {
+      case 'travelTime':
+        return 'Nearest (Shortest Drive)';
+      case 'waitTime':
+        return 'Shortest Wait Time';
+      case 'combined':
+        return 'Best Combined (Drive + Wait)';
+    }
+  };
+
   const renderHospitalCard = ({ item, index }: { item: Hospital; index: number }) => (
     <TouchableOpacity
       style={styles.card}
@@ -228,17 +340,30 @@ export default function Index() {
 
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
-          <Ionicons name="time-outline" size={20} color={getWaitTimeColor(item.currentWaitTime)} />
-          <Text style={[styles.statLabel, { color: getWaitTimeColor(item.currentWaitTime) }]}>
-            Wait: {formatWaitTime(item.currentWaitTime)}
+          <Ionicons name="car" size={20} color="#0066CC" />
+          <Text style={styles.statValue}>
+            {item.travelTimeMinutes}min drive
           </Text>
         </View>
-        {item.distance && (
-          <View style={styles.statItem}>
-            <Ionicons name="location-outline" size={20} color="#6B7280" />
-            <Text style={styles.statValue}>{item.distance.toFixed(1)} km away</Text>
-          </View>
-        )}
+        <View style={styles.statItem}>
+          <Ionicons name="time-outline" size={20} color={getWaitTimeColor(item.currentWaitTime)} />
+          <Text style={[styles.statLabel, { color: getWaitTimeColor(item.currentWaitTime) }]}>
+            {formatWaitTime(item.currentWaitTime)} wait
+          </Text>
+        </View>
+      </View>
+
+      {sortMode === 'combined' && (
+        <View style={styles.totalTimeContainer}>
+          <Text style={styles.totalTimeLabel}>
+            Total: {item.totalTimeMinutes}min ({item.travelTimeMinutes}min drive + {formatWaitTime(item.currentWaitTime)} wait)
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.distanceRow}>
+        <Ionicons name="location-outline" size={16} color="#6B7280" />
+        <Text style={styles.distanceText}>{item.distance?.toFixed(1)} km away</Text>
       </View>
 
       <View style={styles.servicesContainer}>
@@ -268,7 +393,7 @@ export default function Index() {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (loading && !showPostalCodeInput) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -279,22 +404,51 @@ export default function Index() {
     );
   }
 
-  if (locationPermission === false) {
+  if (showPostalCodeInput) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.permissionContainer}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.postalCodeContainer}
+        >
           <Ionicons name="location-outline" size={64} color="#9CA3AF" />
-          <Text style={styles.permissionTitle}>Location Access Required</Text>
-          <Text style={styles.permissionText}>
-            We need your location to find the nearest emergency rooms and calculate accurate distances.
+          <Text style={styles.postalCodeTitle}>Location Access Required</Text>
+          <Text style={styles.postalCodeText}>
+            Please enter your Ontario postal code to find nearby emergency rooms.
           </Text>
+          
+          <TextInput
+            style={styles.postalCodeInput}
+            placeholder="K1A 0B1"
+            value={postalCode}
+            onChangeText={setPostalCode}
+            autoCapitalize="characters"
+            maxLength={7}
+          />
+          
           <TouchableOpacity
-            style={styles.permissionButton}
-            onPress={requestLocationPermission}
+            style={styles.postalCodeButton}
+            onPress={handlePostalCodeSubmit}
           >
-            <Text style={styles.permissionButtonText}>Enable Location</Text>
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Ionicons name="search" size={20} color="white" />
+                <Text style={styles.postalCodeButtonText}>Find Hospitals</Text>
+              </>
+            )}
           </TouchableOpacity>
-        </View>
+
+          {Platform.OS !== 'web' && (
+            <TouchableOpacity
+              style={styles.retryGPSButton}
+              onPress={requestLocationPermission}
+            >
+              <Text style={styles.retryGPSText}>Try GPS Again</Text>
+            </TouchableOpacity>
+          )}
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -306,7 +460,34 @@ export default function Index() {
           <Ionicons name="medical" size={32} color="#DC2626" />
           <Text style={styles.title}>Ontario ER Finder</Text>
         </View>
-        <Text style={styles.subtitle}>Top {hospitals.length} Emergency Rooms Near You</Text>
+        
+        <View style={styles.locationIndicator}>
+          <Ionicons 
+            name={locationSource === 'gps' ? 'navigate' : 'mail'} 
+            size={16} 
+            color="#6B7280" 
+          />
+          <Text style={styles.locationText}>
+            {locationSource === 'gps' ? 'Using GPS location' : `Using postal code: ${postalCode}`}
+          </Text>
+        </View>
+
+        <Text style={styles.subtitle}>Top {hospitals.length} Emergency Rooms</Text>
+        
+        <View style={styles.sortContainer}>
+          <Text style={styles.sortLabel}>Sort by:</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={sortMode}
+              style={styles.picker}
+              onValueChange={(value) => setSortMode(value as SortMode)}
+            >
+              <Picker.Item label="Best Combined" value="combined" />
+              <Picker.Item label="Nearest" value="travelTime" />
+              <Picker.Item label="Shortest Wait" value="waitTime" />
+            </Picker>
+          </View>
+        </View>
       </View>
 
       {selectedHospital && (
@@ -330,15 +511,29 @@ export default function Index() {
             </View>
 
             <View style={styles.detailSection}>
+              <Ionicons name="car" size={20} color="#0066CC" />
+              <Text style={styles.detailText}>
+                Travel time: ~{selectedHospital.travelTimeMinutes} minutes
+              </Text>
+            </View>
+
+            <View style={styles.detailSection}>
               <Ionicons name="time" size={20} color={getWaitTimeColor(selectedHospital.currentWaitTime)} />
               <Text style={[styles.detailText, { color: getWaitTimeColor(selectedHospital.currentWaitTime), fontWeight: '600' }]}>
                 Current Wait: {formatWaitTime(selectedHospital.currentWaitTime)}
               </Text>
             </View>
 
+            <View style={styles.detailSection}>
+              <Ionicons name="pulse" size={20} color="#DC2626" />
+              <Text style={[styles.detailText, { fontWeight: '600' }]}>
+                Total Time: ~{selectedHospital.totalTimeMinutes} minutes
+              </Text>
+            </View>
+
             {selectedHospital.distance && (
               <View style={styles.detailSection}>
-                <Ionicons name="car" size={20} color="#6B7280" />
+                <Ionicons name="map" size={20} color="#6B7280" />
                 <Text style={styles.detailText}>
                   Distance: {selectedHospital.distance.toFixed(1)} km
                 </Text>
@@ -416,10 +611,43 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginLeft: 12,
   },
+  locationIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  locationText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginLeft: 6,
+  },
   subtitle: {
     fontSize: 14,
     color: '#6B7280',
     marginTop: 4,
+    marginBottom: 12,
+  },
+  sortContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  sortLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginRight: 8,
+  },
+  pickerContainer: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    backgroundColor: '#F9FAFB',
+  },
+  picker: {
+    height: 40,
   },
   loadingContainer: {
     flex: 1,
@@ -431,35 +659,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
   },
-  permissionContainer: {
+  postalCodeContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
   },
-  permissionTitle: {
+  postalCodeTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#111827',
     marginTop: 24,
     marginBottom: 12,
   },
-  permissionText: {
+  postalCodeText: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 24,
   },
-  permissionButton: {
+  postalCodeInput: {
+    width: '100%',
+    height: 56,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    backgroundColor: 'white',
+    marginBottom: 16,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  postalCodeButton: {
+    width: '100%',
+    flexDirection: 'row',
     backgroundColor: '#0066CC',
-    paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
   },
-  permissionButtonText: {
+  postalCodeButtonText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  retryGPSButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+  },
+  retryGPSText: {
+    color: '#0066CC',
+    fontSize: 14,
     fontWeight: '600',
   },
   listContent: {
@@ -509,7 +763,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 8,
     gap: 16,
   },
   statItem: {
@@ -523,6 +777,28 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 14,
+    color: '#0066CC',
+    fontWeight: '600',
+  },
+  totalTimeContainer: {
+    backgroundColor: '#EFF6FF',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  totalTimeLabel: {
+    fontSize: 13,
+    color: '#1E40AF',
+    fontWeight: '500',
+  },
+  distanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+  },
+  distanceText: {
+    fontSize: 13,
     color: '#6B7280',
   },
   servicesContainer: {
