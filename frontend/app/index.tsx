@@ -73,20 +73,43 @@ function validateOntarioPostalCode(postalCode: string): boolean {
   return ontarioPostalRegex.test(postalCode.trim());
 }
 
-// Geocode postal code to coordinates using a free service
+// Geocode postal code to coordinates using multiple services
 async function geocodePostalCode(postalCode: string): Promise<Coordinates | null> {
   try {
-    // Using Nominatim (OpenStreetMap) free geocoding service
     const formattedPostalCode = postalCode.trim().replace(/\s+/g, '+');
-    const response = await fetch(
+    
+    // Try Nominatim with postal code
+    let response = await fetch(
       `https://nominatim.openstreetmap.org/search?postalcode=${formattedPostalCode}&country=Canada&format=json&limit=1`
     );
     
-    if (!response.ok) {
-      throw new Error('Geocoding failed');
+    let data = await response.json();
+    
+    // If no results, try with full query including Ontario
+    if (!data || data.length === 0) {
+      response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${formattedPostalCode}+Ontario+Canada&format=json&limit=1`
+      );
+      data = await response.json();
     }
     
-    const data = await response.json();
+    // If still no results, try Geocode.ca (Canadian postal code service)
+    if (!data || data.length === 0) {
+      const cleanPostal = postalCode.trim().replace(/\s+/g, '');
+      response = await fetch(
+        `https://geocoder.ca/?locate=${cleanPostal}&geoit=XML&json=1`
+      );
+      
+      if (response.ok) {
+        const geoData = await response.json();
+        if (geoData && geoData.latt && geoData.longt) {
+          return {
+            lat: parseFloat(geoData.latt),
+            lng: parseFloat(geoData.longt),
+          };
+        }
+      }
+    }
     
     if (data && data.length > 0) {
       return {
