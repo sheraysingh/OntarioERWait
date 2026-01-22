@@ -278,23 +278,37 @@ export default function Index() {
     }
 
     setLoading(true);
-    setShowPostalCodeInput(false); // Close modal immediately
+    setShowPostalCodeInput(false);
     
-    const coordinates = await geocodePostalCode(postalCode);
-    
-    if (coordinates) {
-      const location = {
-        coords: {
-          latitude: coordinates.lat,
-          longitude: coordinates.lng,
-        },
-      };
-      setUserLocation(location);
-      setLocationSource('postal');
-      await initializeLocation(coordinates.lat, coordinates.lng);
-    } else {
+    try {
+      const coordinates = await geocodePostalCode(postalCode);
+      
+      if (coordinates) {
+        console.log('Geocoded coordinates:', coordinates);
+        
+        // Clear old data first
+        setHospitals([]);
+        setAreaName('');
+        
+        const location = {
+          coords: {
+            latitude: coordinates.lat,
+            longitude: coordinates.lng,
+          },
+        };
+        setUserLocation(location);
+        setLocationSource('postal');
+        
+        // Force re-fetch with new coordinates
+        await initializeLocation(coordinates.lat, coordinates.lng);
+      } else {
+        setLoading(false);
+        Alert.alert('Error', 'Unable to find coordinates for this postal code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error in handlePostalCodeSubmit:', error);
       setLoading(false);
-      Alert.alert('Error', 'Unable to find coordinates for this postal code. Please try again.');
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     }
   };
 
