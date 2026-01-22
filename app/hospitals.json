@@ -1,1 +1,166 @@
-test file
+Perfect! Let me give you the exact content to paste into GitHub and configure auto-sync on app startup.
+
+## 1. Content for GitHub File
+
+Copy and paste this into your GitHub file at `https://github.com/sheraysingh/OntarioERWait/blob/main/app/hospitals.json`:
+Action: file_editor view /app/hospitals.json
+Observation: /app/hospitals.json:
+1|[
+2|  {
+3|    "id": "toronto_general",
+4|    "name": "Toronto General Hospital",
+5|    "address": "200 Elizabeth St, Toronto, ON M5G 2C4",
+6|    "city": "Toronto",
+7|    "latitude": 43.6596,
+8|    "longitude": -79.3894,
+9|    "phone": "416-340-4800",
+10|    "services": ["Emergency", "Trauma", "Cardiac Care"],
+11|    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/wait_times.aspx",
+12|    "defaultWaitTime": 120
+13|  },
+14|  {
+15|    "id": "mount_sinai",
+16|    "name": "Mount Sinai Hospital",
+17|    "address": "600 University Ave, Toronto, ON M5G 1X5",
+18|    "city": "Toronto",
+19|    "latitude": 43.6567,
+20|    "longitude": -79.3900,
+21|    "phone": "416-596-4200",
+22|    "services": ["Emergency", "Maternity", "Surgery"],
+23|    "waitTimeUrl": "https://www.sinaihealth.ca/patients-visitors/emergency-wait-times/",
+24|    "defaultWaitTime": 90
+25|  },
+26|  {
+27|    "id": "st_michaels",
+28|    "name": "St. Michael's Hospital",
+29|    "address": "30 Bond St, Toronto, ON M5B 1W8",
+30|    "city": "Toronto",
+31|    "latitude": 43.6533,
+32|    "longitude": -79.3772,
+33|    "phone": "416-360-4000",
+34|    "services": ["Emergency", "Trauma", "Cardiology"],
+35|    "waitTimeUrl": "https://www.unityhealth.to/areas-of-care/emergency-care/",
+36|    "defaultWaitTime": 135
+37|  },
+38|  {
+39|    "id": "sunnybrook",
+40|    "name": "Sunnybrook Health Sciences Centre",
+41|    "address": "2075 Bayview Ave, Toronto, ON M4N 3M5",
+42|    "city": "Toronto",
+43|    "latitude": 43.7239,
+44|    "longitude": -79.3759,
+45|    "phone": "416-480-6100",
+46|    "services": ["Emergency", "Trauma", "Veterans Care"],
+47|    "waitTimeUrl": "https://sunnybrook.ca/content/?page=emergency-wait-times",
+48|    "defaultWaitTime": 105
+49|  },
+50|  {
+51|    "id": "north_york_general",
+52|    "name": "North York General Hospital",
+53|    "address": "4001 Leslie St, North York, ON M2K 1E1",
+54|    "city": "Toronto",
+55|    "latitude": 43.7653,
+56|    "longitude": -79.3977,
+57|    "phone": "416-756-6000",
+58|    "services": ["Emergency", "Surgery", "Mental Health"],
+59|    "waitTimeUrl": "https://www.nygh.on.ca/patients-visitors/emergency-department",
+60|    "defaultWaitTime": 100
+61|  },
+62|  {
+63|    "id": "brampton_civic",
+64|    "name": "Brampton Civic Hospital",
+65|    "address": "2100 Bovaird Dr E, Brampton, ON L6R 3J7",
+66|    "city": "Brampton",
+67|    "latitude": 43.7310,
+68|    "longitude": -79.7487,
+69|    "phone": "905-494-2120",
+70|    "services": ["Emergency", "Surgery", "Maternity"],
+71|    "waitTimeUrl": "https://www.williamoslerhs.ca/patients-and-families/emergency-wait-times/",
+72|    "defaultWaitTime": 80
+73|  },
+74|  {
+75|    "id": "peel_memorial",
+76|    "name": "Peel Memorial Centre for Integrated Health and Wellness",
+77|    "address": "20 Lynch St, Brampton, ON L6W 3A2",
+78|    "city": "Brampton",
+79|    "latitude": 43.6876,
+80|    "longitude": -79.7580,
+81|    "phone": "905-494-2120",
+82|    "services": ["Urgent Care", "Ambulatory", "Rehabilitation"],
+83|    "waitTimeUrl": "https://www.williamoslerhs.ca/patients-and-families/emergency-wait-times/",
+84|    "defaultWaitTime": 70
+85|  },
+86|  {
+87|    "id": "trillium_mississauga",
+88|    "name": "Trillium Health Partners - Mississauga Hospital",
+89|    "address": "100 Queensway W, Mississauga, ON L5B 1B8",
+90|    "city": "Mississauga",
+91|    "latitude": 43.5890,
+92|    "longitude": -79.6441,
+93|    "phone": "905-848-7100",
+94|    "services": ["Emergency", "Maternity", "Cardiology"],
+95|    "waitTimeUrl": "https://trilliumhealthpartners.ca/patients-visitors/emergency-wait-times.html",
+96|    "defaultWaitTime": 140
+97|  },
+98|  {
+99|    "id": "trillium_credit_valley",
+100|    "name": "Trillium Health Partners - Credit Valley Hospital",
+101|    "address": "2200 Eglinton Ave W, Mississauga, ON L5M 2N1",
+102|    "city": "Mississauga",
+103|    "latitude": 43.5847,
+104|    "longitude": -79.6489,
+105|    "phone": "905-813-2200",
+106|    "services": ["Emergency", "Surgery", "Cancer Care"],
+107|    "waitTimeUrl": "https://trilliumhealthpartners.ca/patients-visitors/emergency-wait-times.html",
+108|    "defaultWaitTime": 95
+109|  },
+110|  {
+111|    "id": "ottawa_civic",
+112|    "name": "The Ottawa Hospital - Civic Campus",
+113|    "address": "1053 Carling Ave, Ottawa, ON K1Y 4E9",
+114|    "city": "Ottawa",
+115|    "latitude": 45.3979,
+116|    "longitude": -75.7338,
+117|    "phone": "613-722-7000",
+118|    "services": ["Emergency", "Trauma", "Surgery"],
+119|    "waitTimeUrl": "https://www.ottawahospital.on.ca/en/patients-visitors/emergency-department-wait-times/",
+120|    "defaultWaitTime": 150
+121|  },
+122|  {
+123|    "id": "ottawa_general",
+124|    "name": "The Ottawa Hospital - General Campus",
+125|    "address": "501 Smyth Rd, Ottawa, ON K1H 8L6",
+126|    "city": "Ottawa",
+127|    "latitude": 45.4042,
+128|    "longitude": -75.6533,
+129|    "phone": "613-722-7000",
+130|    "services": ["Emergency", "Cardiac", "Research"],
+131|    "waitTimeUrl": "https://www.ottawahospital.on.ca/en/patients-visitors/emergency-department-wait-times/",
+132|    "defaultWaitTime": 110
+133|  },
+134|  {
+135|    "id": "hamilton_general",
+136|    "name": "Hamilton General Hospital",
+137|    "address": "237 Barton St E, Hamilton, ON L8L 2X2",
+138|    "city": "Hamilton",
+139|    "latitude": 43.2557,
+140|    "longitude": -79.8480,
+141|    "phone": "905-527-4322",
+142|    "services": ["Emergency", "Trauma", "Stroke Care"],
+143|    "waitTimeUrl": "https://www.hamiltonhealthsciences.ca/patients-visitors/emergency-wait-times/",
+144|    "defaultWaitTime": 95
+145|  },
+146|  {
+147|    "id": "london_victoria",
+148|    "name": "London Health Sciences Centre - Victoria Hospital",
+149|    "address": "800 Commissioners Rd E, London, ON N6A 5W9",
+150|    "city": "London",
+151|    "latitude": 42.9738,
+152|    "longitude": -81.2178,
+153|    "phone": "519-685-8500",
+154|    "services": ["Emergency", "Pediatrics", "Surgery"],
+155|    "waitTimeUrl": "https://www.lhsc.on.ca/patients-visitors/emergency-wait-times",
+156|    "defaultWaitTime": 125
+157|  }
+158|]
+159|
