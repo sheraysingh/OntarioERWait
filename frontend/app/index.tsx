@@ -102,6 +102,50 @@ async function geocodePostalCode(postalCode: string): Promise<Coordinates | null
   }
 }
 
+// Reverse geocode coordinates to get area name
+async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    // Try using expo-location first (mobile only)
+    if (Platform.OS !== 'web' && Location) {
+      const result = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+      if (result && result.length > 0) {
+        const location = result[0];
+        const parts = [];
+        if (location.city) parts.push(location.city);
+        if (location.district || location.subregion) parts.push(location.district || location.subregion);
+        return parts.join(' - ') || 'Unknown Area';
+      }
+    }
+    
+    // Fallback to Nominatim for web or if expo-location fails
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Reverse geocoding failed');
+    }
+    
+    const data = await response.json();
+    
+    if (data && data.address) {
+      const parts = [];
+      if (data.address.city || data.address.town || data.address.village) {
+        parts.push(data.address.city || data.address.town || data.address.village);
+      }
+      if (data.address.suburb || data.address.neighbourhood) {
+        parts.push(data.address.suburb || data.address.neighbourhood);
+      }
+      return parts.join(' - ') || 'Unknown Area';
+    }
+    
+    return 'Unknown Area';
+  } catch (error) {
+    console.error('Error reverse geocoding:', error);
+    return 'Unknown Area';
+  }
+}
+
 export default function Index() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
