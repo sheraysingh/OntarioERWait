@@ -318,7 +318,7 @@ export default function Index() {
   const fetchNearbyHospitals = async (lat: number, lng: number) => {
     try {
       const response = await fetch(
-        `${EXPO_PUBLIC_BACKEND_URL}/api/hospitals/nearby?lat=${lat}&lng=${lng}&limit=10`
+        `${EXPO_PUBLIC_BACKEND_URL}/api/hospitals/nearby?lat=${lat}&lng=${lng}&limit=5`
       );
       
       if (!response.ok) {
