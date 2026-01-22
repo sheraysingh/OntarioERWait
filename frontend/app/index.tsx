@@ -113,6 +113,7 @@ export default function Index() {
   const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
   const [postalCode, setPostalCode] = useState('');
   const [locationSource, setLocationSource] = useState<'gps' | 'postal' | null>(null);
+  const [areaName, setAreaName] = useState<string>('');
 
   useEffect(() => {
     if (Platform.OS === 'web') {
