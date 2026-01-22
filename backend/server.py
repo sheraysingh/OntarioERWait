@@ -299,7 +299,7 @@ async def get_hospital_by_id(hospital_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@api_router.post("/calculate-travel-time")
+@api_router.get("/calculate-travel-time")
 async def calculate_travel_time(
     start_lat: float = Query(..., description="Starting latitude"),
     start_lng: float = Query(..., description="Starting longitude"),
