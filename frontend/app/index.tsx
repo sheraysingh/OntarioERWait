@@ -40,7 +40,36 @@ interface Hospital {
   services: string[];
   distance?: number;
   score?: number;
+  travelTimeMinutes?: number;
+  totalTimeMinutes?: number;
 }
+
+type SortMode = 'combined' | 'travelTime' | 'waitTime';
+
+interface TravelTimeProvider {
+  calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number>;
+}
+
+// Option B: Estimated travel time based on average speed
+class EstimatedTravelTimeProvider implements TravelTimeProvider {
+  private readonly AVERAGE_SPEED_KMH = 40; // Urban driving speed in Ontario
+
+  async calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number> {
+    // Travel time in minutes = (distance / speed) * 60
+    const travelTimeMinutes = (distanceKm / this.AVERAGE_SPEED_KMH) * 60;
+    return Math.round(travelTimeMinutes);
+  }
+}
+
+// Future: Can add RealRoutingTimeProvider that calls OpenRouteService or Google Maps API
+// class RealRoutingTimeProvider implements TravelTimeProvider {
+//   async calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number> {
+//     // Call routing API here
+//     return travelTime;
+//   }
+// }
+
+const travelTimeProvider: TravelTimeProvider = new EstimatedTravelTimeProvider();
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
