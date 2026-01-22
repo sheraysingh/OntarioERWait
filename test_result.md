@@ -101,3 +101,158 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Build an Ontario ER Finder iOS mobile app that:
+  - Detects user's current location in Ontario
+  - Finds nearest hospital Emergency Rooms
+  - Shows real-time ER wait times
+  - Recommends top 5 ERs based on distance + wait time
+  - Allows navigation to selected hospital
+
+backend:
+  - task: "Hospital data model and seeding"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created MongoDB schema for hospitals with coordinates, wait times, services. Seeded 10 major Ontario hospitals (Toronto, Ottawa, Hamilton, London, Mississauga)"
+
+  - task: "GET /api/hospitals - Get all hospitals"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Returns list of all hospitals with complete information"
+
+  - task: "GET /api/hospitals/nearby - Get nearby hospitals with ranking"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Accepts lat, lng, limit, distance_weight, wait_weight params. Calculates distance using Haversine formula. Ranks hospitals by combined score of distance and wait time. Returns sorted list with top N results."
+
+  - task: "GET /api/hospitals/:id - Get hospital by ID"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Returns detailed information for a specific hospital by ID"
+
+frontend:
+  - task: "Location permission handling"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Requests location permission. Shows permission screen if denied. Uses default Toronto location (43.6532, -79.3832) on web platform. Uses expo-location on native mobile."
+
+  - task: "Fetch and display nearby hospitals"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fetches top 10 nearby hospitals from API. Displays ranked list with hospital cards showing: rank badge, name, city, wait time (color-coded), distance, services, Navigate and Call buttons."
+
+  - task: "Hospital detail modal"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Tap hospital card to view detailed modal with full address, phone, wait time, distance, all services, and action buttons."
+
+  - task: "Navigate to hospital functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Opens native maps (Apple Maps on iOS, Google Maps on Android) with hospital coordinates for navigation."
+
+  - task: "Call hospital functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Opens phone dialer with hospital phone number."
+
+  - task: "Pull to refresh"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/app/index.tsx"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Pull down on list to refresh hospital data and wait times."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "GET /api/hospitals/nearby - Get nearby hospitals with ranking"
+    - "Fetch and display nearby hospitals"
+    - "Navigate to hospital functionality"
+    - "Call hospital functionality"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Initial implementation complete. Backend has hospital data seeded with 10 Ontario hospitals.
+      API endpoints implemented for getting all hospitals, nearby hospitals with ranking algorithm, and individual hospital details.
+      Frontend displays ranked list of ERs with color-coded wait times, distance, services.
+      Web version tested and working visually. Ready for comprehensive backend API testing.
+      Please test all backend endpoints with various parameters, especially the ranking algorithm.
