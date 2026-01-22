@@ -644,6 +644,7 @@ export default function Index() {
                 placeholder="L7A 4M7"
                 value={postalCode}
                 onChangeText={handlePostalCodeChange}
+                onFocus={() => setPostalCode('')}
                 autoCapitalize="characters"
                 maxLength={7}
               />
