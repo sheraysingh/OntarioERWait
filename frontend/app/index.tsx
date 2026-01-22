@@ -53,18 +53,31 @@ interface TravelTimeProvider {
   calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number>;
 }
 
-// Option B: Estimated travel time based on average speed
-class EstimatedTravelTimeProvider implements TravelTimeProvider {
-  private readonly AVERAGE_SPEED_KMH = 40; // Urban driving speed in Ontario
-
+// Option C: Real routing time using OpenRouteService via backend
+class RealRoutingTimeProvider implements TravelTimeProvider {
   async calculateTravelTime(from: Coordinates, to: Coordinates, distanceKm: number): Promise<number> {
-    // Travel time in minutes = (distance / speed) * 60
-    const travelTimeMinutes = (distanceKm / this.AVERAGE_SPEED_KMH) * 60;
-    return Math.round(travelTimeMinutes);
+    try {
+      const response = await fetch(
+        `${EXPO_PUBLIC_BACKEND_URL}/api/calculate-travel-time?start_lat=${from.lat}&start_lng=${from.lng}&end_lat=${to.lat}&end_lng=${to.lng}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to calculate travel time');
+      }
+      
+      const data = await response.json();
+      return data.duration; // Real driving time in minutes
+    } catch (error) {
+      console.error('Error calculating travel time:', error);
+      // Fallback to estimation
+      const AVERAGE_SPEED_KMH = 40;
+      const travelTimeMinutes = (distanceKm / AVERAGE_SPEED_KMH) * 60;
+      return Math.round(travelTimeMinutes);
+    }
   }
 }
 
-const travelTimeProvider: TravelTimeProvider = new EstimatedTravelTimeProvider();
+const travelTimeProvider: TravelTimeProvider = new RealRoutingTimeProvider();
 
 // Validate Ontario postal code format (K1A 0B1)
 function validateOntarioPostalCode(postalCode: string): boolean {
