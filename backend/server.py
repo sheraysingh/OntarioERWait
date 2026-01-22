@@ -23,6 +23,12 @@ db = client[os.environ['DB_NAME']]
 # OpenRouteService API key
 ORS_API_KEY = os.environ.get('OPENROUTESERVICE_API_KEY', '')
 
+# Hospital JSON URL (GitHub or local)
+HOSPITAL_JSON_URL = os.environ.get('HOSPITAL_JSON_URL', '')
+
+# Cache timestamp
+hospital_cache_timestamp = None
+
 # Create the main app without a prefix
 app = FastAPI()
 
