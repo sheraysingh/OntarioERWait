@@ -234,6 +234,8 @@ export default function Index() {
     }
 
     setLoading(true);
+    setShowPostalCodeInput(false); // Close modal immediately
+    
     const coordinates = await geocodePostalCode(postalCode);
     
     if (coordinates) {
@@ -245,12 +247,28 @@ export default function Index() {
       };
       setUserLocation(location);
       setLocationSource('postal');
-      setShowPostalCodeInput(false);
       await initializeLocation(coordinates.lat, coordinates.lng);
     } else {
       setLoading(false);
       Alert.alert('Error', 'Unable to find coordinates for this postal code. Please try again.');
     }
+  };
+
+  const formatPostalCode = (text: string) => {
+    // Remove all non-alphanumeric characters
+    const cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    
+    // Add space after 3 characters
+    if (cleaned.length > 3) {
+      return cleaned.slice(0, 3) + ' ' + cleaned.slice(3, 6);
+    }
+    
+    return cleaned;
+  };
+
+  const handlePostalCodeChange = (text: string) => {
+    const formatted = formatPostalCode(text);
+    setPostalCode(formatted);
   };
 
   const fetchNearbyHospitals = async (lat: number, lng: number) => {
