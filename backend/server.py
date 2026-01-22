@@ -96,6 +96,7 @@ async def seed_hospitals():
         return
     
     hospitals = [
+        # Toronto Hospitals
         {
             "name": "Toronto General Hospital",
             "address": "200 Elizabeth St, Toronto, ON M5G 2C4",
@@ -137,6 +138,62 @@ async def seed_hospitals():
             "services": ["Emergency", "Trauma", "Veterans Care"]
         },
         {
+            "name": "North York General Hospital",
+            "address": "4001 Leslie St, North York, ON M2K 1E1",
+            "city": "Toronto",
+            "coordinates": {"lat": 43.7653, "lng": -79.3977},
+            "currentWaitTime": 100,
+            "lastUpdated": datetime.utcnow(),
+            "phone": "416-756-6000",
+            "services": ["Emergency", "Surgery", "Mental Health"]
+        },
+        
+        # Brampton Hospitals
+        {
+            "name": "Brampton Civic Hospital",
+            "address": "2100 Bovaird Dr E, Brampton, ON L6R 3J7",
+            "city": "Brampton",
+            "coordinates": {"lat": 43.7310, "lng": -79.7487},
+            "currentWaitTime": 80,
+            "lastUpdated": datetime.utcnow(),
+            "phone": "905-494-2120",
+            "services": ["Emergency", "Surgery", "Maternity"]
+        },
+        {
+            "name": "Peel Memorial Centre for Integrated Health and Wellness",
+            "address": "20 Lynch St, Brampton, ON L6W 3A2",
+            "city": "Brampton",
+            "coordinates": {"lat": 43.6876, "lng": -79.7580},
+            "currentWaitTime": 70,
+            "lastUpdated": datetime.utcnow(),
+            "phone": "905-494-2120",
+            "services": ["Urgent Care", "Ambulatory", "Rehabilitation"]
+        },
+        
+        # Mississauga Hospitals
+        {
+            "name": "Trillium Health Partners - Mississauga Hospital",
+            "address": "100 Queensway W, Mississauga, ON L5B 1B8",
+            "city": "Mississauga",
+            "coordinates": {"lat": 43.5890, "lng": -79.6441},
+            "currentWaitTime": 140,
+            "lastUpdated": datetime.utcnow(),
+            "phone": "905-848-7100",
+            "services": ["Emergency", "Maternity", "Cardiology"]
+        },
+        {
+            "name": "Trillium Health Partners - Credit Valley Hospital",
+            "address": "2200 Eglinton Ave W, Mississauga, ON L5M 2N1",
+            "city": "Mississauga",
+            "coordinates": {"lat": 43.5847, "lng": -79.6489},
+            "currentWaitTime": 95,
+            "lastUpdated": datetime.utcnow(),
+            "phone": "905-813-2200",
+            "services": ["Emergency", "Surgery", "Cancer Care"]
+        },
+        
+        # Ottawa Hospitals
+        {
             "name": "The Ottawa Hospital - Civic Campus",
             "address": "1053 Carling Ave, Ottawa, ON K1Y 4E9",
             "city": "Ottawa",
@@ -156,6 +213,8 @@ async def seed_hospitals():
             "phone": "613-722-7000",
             "services": ["Emergency", "Cardiac", "Research"]
         },
+        
+        # Hamilton Hospital
         {
             "name": "Hamilton General Hospital",
             "address": "237 Barton St E, Hamilton, ON L8L 2X2",
@@ -166,6 +225,8 @@ async def seed_hospitals():
             "phone": "905-527-4322",
             "services": ["Emergency", "Trauma", "Stroke Care"]
         },
+        
+        # London Hospital
         {
             "name": "London Health Sciences Centre - Victoria Hospital",
             "address": "800 Commissioners Rd E, London, ON N6A 5W9",
@@ -175,26 +236,6 @@ async def seed_hospitals():
             "lastUpdated": datetime.utcnow(),
             "phone": "519-685-8500",
             "services": ["Emergency", "Pediatrics", "Surgery"]
-        },
-        {
-            "name": "Trillium Health Partners - Mississauga Hospital",
-            "address": "100 Queensway W, Mississauga, ON L5B 1B8",
-            "city": "Mississauga",
-            "coordinates": {"lat": 43.5890, "lng": -79.6441},
-            "currentWaitTime": 140,
-            "lastUpdated": datetime.utcnow(),
-            "phone": "905-848-7100",
-            "services": ["Emergency", "Maternity", "Cardiology"]
-        },
-        {
-            "name": "North York General Hospital",
-            "address": "4001 Leslie St, North York, ON M2K 1E1",
-            "city": "Toronto",
-            "coordinates": {"lat": 43.7653, "lng": -79.3977},
-            "currentWaitTime": 100,
-            "lastUpdated": datetime.utcnow(),
-            "phone": "416-756-6000",
-            "services": ["Emergency", "Surgery", "Mental Health"]
         }
     ]
     
