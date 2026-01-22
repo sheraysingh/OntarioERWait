@@ -560,9 +560,9 @@ export default function Index() {
               <Text style={styles.postalCodeLabel}>Enter Ontario Postal Code:</Text>
               <TextInput
                 style={styles.postalCodeInput}
-                placeholder="K1A 0B1"
+                placeholder="L7A 4M7"
                 value={postalCode}
-                onChangeText={setPostalCode}
+                onChangeText={handlePostalCodeChange}
                 autoCapitalize="characters"
                 maxLength={7}
               />
