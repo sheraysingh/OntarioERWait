@@ -613,12 +613,7 @@ export default function Index() {
               
               <TouchableOpacity
                 style={styles.postalCodeButton}
-                onPress={async () => {
-                  await handlePostalCodeSubmit();
-                  if (!loading) {
-                    setShowPostalCodeInput(false);
-                  }
-                }}
+                onPress={handlePostalCodeSubmit}
               >
                 {loading ? (
                   <ActivityIndicator color="white" />
