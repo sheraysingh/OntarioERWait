@@ -37,8 +37,8 @@ api_router = APIRouter(prefix="/api")
 
 # Pydantic Models
 class Coordinates(BaseModel):
-    lat: float
-    lng: float
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 class Hospital(BaseModel):
     id: Optional[str] = None
@@ -250,7 +250,66 @@ async def seed_hospitals():
 
 @app.on_event("startup")
 async def startup_event():
-    await seed_hospitals()
+    # Try to sync from GitHub first
+    if HOSPITAL_JSON_URL:
+        try:
+            logger.info("Attempting to sync hospitals from GitHub on startup...")
+            await sync_hospitals_from_github_internal()
+        except Exception as e:
+            logger.warning(f"GitHub sync failed on startup: {str(e)}, using local seed")
+            await seed_hospitals()
+    else:
+        await seed_hospitals()
+
+async def sync_hospitals_from_github_internal():
+    """Internal function to sync from GitHub"""
+    hospital_data = None
+    
+    # Try to load from GitHub URL
+    if HOSPITAL_JSON_URL and HOSPITAL_JSON_URL.startswith('http'):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(HOSPITAL_JSON_URL, timeout=10.0)
+                if response.status_code == 200:
+                    hospital_data = response.json()
+                    logger.info(f"✓ Loaded {len(hospital_data)} hospitals from GitHub")
+        except Exception as e:
+            logger.error(f"✗ Error loading from GitHub: {str(e)}")
+    
+    # Fallback to local file
+    if not hospital_data:
+        local_path = ROOT_DIR / 'hospitals.json'
+        if local_path.exists():
+            import json
+            with open(local_path, 'r') as f:
+                hospital_data = json.load(f)
+            logger.info(f"✓ Loaded {len(hospital_data)} hospitals from local file")
+    
+    if not hospital_data:
+        raise Exception("No hospital data source available")
+    
+    # Check if we need to update
+    count = await db.hospitals.count_documents({})
+    if count > 0:
+        logger.info(f"Hospital database already has {count} hospitals, skipping sync")
+        return
+    
+    # Insert hospitals
+    hospitals_to_insert = []
+    for h in hospital_data:
+        hospitals_to_insert.append({
+            "name": h["name"],
+            "address": h["address"],
+            "city": h["city"],
+            "coordinates": {"lat": h["latitude"], "lng": h["longitude"]},
+            "currentWaitTime": h.get("defaultWaitTime", 120),
+            "lastUpdated": datetime.utcnow(),
+            "phone": h["phone"],
+            "services": h["services"]
+        })
+    
+    await db.hospitals.insert_many(hospitals_to_insert)
+    logger.info(f"✓ Synced {len(hospitals_to_insert)} hospitals to database")
 
 # API Routes
 @api_router.get("/")
@@ -290,6 +349,10 @@ async def get_nearby_hospitals(
     # Calculate distance and score for each hospital
     results = []
     for h in hospitals:
+        # Skip hospitals with null coordinates
+        if h["coordinates"]["lat"] is None or h["coordinates"]["lng"] is None:
+            continue
+            
         distance = calculate_distance(
             lat, lng,
             h["coordinates"]["lat"],
