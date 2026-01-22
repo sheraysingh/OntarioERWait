@@ -449,60 +449,97 @@ export default function Index() {
           <Text style={styles.hospitalName} numberOfLines={2}>
             {item.name}
           </Text>
-          <Text style={styles.cityText}>{item.city}</Text>
+          <Text style={styles.cityText}>{item.city || 'Location not available'}</Text>
         </View>
       </View>
 
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Ionicons name="car" size={20} color="#0066CC" />
-          <Text style={styles.statValue}>
-            {item.travelTimeMinutes}min drive
-          </Text>
+          {item.travelTimeMinutes ? (
+            <Text style={styles.statValue}>
+              {item.travelTimeMinutes}min drive
+            </Text>
+          ) : (
+            <Text style={styles.statValueNA}>
+              Travel time N/A
+            </Text>
+          )}
         </View>
         <View style={styles.statItem}>
           <Ionicons name="time-outline" size={20} color={getWaitTimeColor(item.currentWaitTime)} />
-          <Text style={[styles.statLabel, { color: getWaitTimeColor(item.currentWaitTime) }]}>
-            {formatWaitTime(item.currentWaitTime)} wait
-          </Text>
+          {item.currentWaitTime ? (
+            <Text style={[styles.statLabel, { color: getWaitTimeColor(item.currentWaitTime) }]}>
+              {formatWaitTime(item.currentWaitTime)} wait
+            </Text>
+          ) : (
+            <View style={styles.naContainer}>
+              <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+              <Text style={styles.statValueNA}>Wait time N/A</Text>
+            </View>
+          )}
         </View>
       </View>
 
-      {sortMode === 'combined' && (
+      {sortMode === 'combined' && item.totalTimeMinutes ? (
         <View style={styles.totalTimeContainer}>
           <Text style={styles.totalTimeLabel}>
             Total: {item.totalTimeMinutes}min ({item.travelTimeMinutes}min drive + {formatWaitTime(item.currentWaitTime)} wait)
           </Text>
         </View>
+      ) : sortMode === 'combined' ? (
+        <View style={styles.naBox}>
+          <Ionicons name="information-circle-outline" size={16} color="#6B7280" />
+          <Text style={styles.naText}>Complete time data not available</Text>
+        </View>
+      ) : null}
+
+      {item.distance ? (
+        <View style={styles.distanceRow}>
+          <Ionicons name="location-outline" size={16} color="#6B7280" />
+          <Text style={styles.distanceText}>{item.distance.toFixed(1)} km away</Text>
+        </View>
+      ) : (
+        <View style={styles.distanceRow}>
+          <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+          <Text style={styles.distanceTextNA}>Distance not available</Text>
+        </View>
       )}
 
-      <View style={styles.distanceRow}>
-        <Ionicons name="location-outline" size={16} color="#6B7280" />
-        <Text style={styles.distanceText}>{item.distance?.toFixed(1)} km away</Text>
-      </View>
-
       <View style={styles.servicesContainer}>
-        {item.services.slice(0, 3).map((service, idx) => (
-          <View key={idx} style={styles.serviceTag}>
-            <Text style={styles.serviceText}>{service}</Text>
+        {item.services && item.services.length > 0 ? (
+          item.services.slice(0, 3).map((service, idx) => (
+            <View key={idx} style={styles.serviceTag}>
+              <Text style={styles.serviceText}>{service}</Text>
+            </View>
+          ))
+        ) : (
+          <View style={styles.serviceTagNA}>
+            <Text style={styles.serviceTextNA}>Services info N/A</Text>
           </View>
-        ))}
+        )}
       </View>
 
       <View style={styles.cardActions}>
         <TouchableOpacity
-          style={styles.navigateButton}
-          onPress={() => openMapsNavigation(item)}
+          style={[styles.navigateButton, !item.coordinates && styles.disabledButton]}
+          onPress={() => item.coordinates && openMapsNavigation(item)}
+          disabled={!item.coordinates}
         >
           <Ionicons name="navigate" size={18} color="white" />
-          <Text style={styles.buttonText}>Navigate</Text>
+          <Text style={styles.buttonText}>
+            {item.coordinates ? 'Navigate' : 'Location N/A'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.callButton}
-          onPress={() => callHospital(item.phone)}
+          style={[styles.callButton, !item.phone && styles.disabledButton]}
+          onPress={() => item.phone && callHospital(item.phone)}
+          disabled={!item.phone}
         >
-          <Ionicons name="call" size={18} color="#0066CC" />
-          <Text style={styles.callButtonText}>Call</Text>
+          <Ionicons name="call" size={18} color={item.phone ? "#0066CC" : "#9CA3AF"} />
+          <Text style={[styles.callButtonText, !item.phone && styles.disabledButtonText]}>
+            {item.phone ? 'Call' : 'Phone N/A'}
+          </Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
