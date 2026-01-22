@@ -981,6 +981,51 @@ const styles = StyleSheet.create({
     color: '#0066CC',
     fontWeight: '600',
   },
+  statValueNA: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  naContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  naBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F3F4F6',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  naText: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  distanceTextNA: {
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+  serviceTagNA: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  serviceTextNA: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  disabledButton: {
+    opacity: 0.5,
+    backgroundColor: '#E5E7EB',
+  },
+  disabledButtonText: {
+    color: '#9CA3AF',
+  },
   totalTimeContainer: {
     backgroundColor: '#EFF6FF',
     padding: 8,
