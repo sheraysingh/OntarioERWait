@@ -13,8 +13,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+
+// Conditional import for expo-location (not available on web)
+let Location: any = null;
+if (Platform.OS !== 'web') {
+  Location = require('expo-location');
+}
 
 const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
