@@ -176,7 +176,7 @@
     "longitude": -79.762222,
     "phone": "905-845-2571",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.haltonhealthcare.on.ca/emergency-department#waittimes",
     "defaultWaitTime": 120
   },
   {
@@ -188,7 +188,7 @@
     "longitude": -79.878889,
     "phone": "905-878-2383",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.haltonhealthcare.on.ca/emergency-department#waittimes",
     "defaultWaitTime": 120
   },
   {
@@ -200,7 +200,7 @@
     "longitude": -79.918056,
     "phone": "905-873-0111",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.haltonhealthcare.on.ca/emergency-department#waittimes",
     "defaultWaitTime": 120
   },
   {
@@ -212,7 +212,7 @@
     "longitude": -80.099722,
     "phone": "519-941-2410",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.headwatershealth.ca/areas-of-care/emergency-care/emergency-wait-times/",
     "defaultWaitTime": 120
   },
   {
@@ -560,7 +560,7 @@
     "longitude": -79.388894,
     "phone": "416-340-4800",
     "services": ["Emergency", "Trauma"],
-    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/wait_times.aspx",
+    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/ED_wait_times.aspx",
     "defaultWaitTime": 120
   },
   {
@@ -572,7 +572,7 @@
     "longitude": -79.406074,
     "phone": "416-603-2581",
     "services": ["Emergency"],
-    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/wait_times.aspx",
+    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/ED_wait_times.aspx",
     "defaultWaitTime": 120
   },
   {
@@ -584,7 +584,7 @@
     "longitude": -79.390686,
     "phone": "416-946-2000",
     "services": ["Emergency"],
-    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/wait_times.aspx",
+    "waitTimeUrl": "https://www.uhn.ca/PatientsFamilies/Visit_UHN/Emergency/Pages/ED_wait_times.aspx",
     "defaultWaitTime": 120
   },
   {
@@ -782,7 +782,7 @@
   {
     "id": "ross_memorial",
     "name": "Ross Memorial Hospital",
-    "address": "711 Concession Street, Hamilton, ON L8V 1C3",
+    "address": "590 Ross Street, Lindsay, ON K9V 4R9",
     "city": "Lindsay",
     "latitude": 44.350000,
     "longitude": -78.750000,
