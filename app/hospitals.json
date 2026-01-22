@@ -20,7 +20,7 @@
     "longitude": -79.659167,
     "phone": "705-728-9802",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://bi.rvh.on.ca:444/SEQ_PublicFacing",
     "defaultWaitTime": 120
   },
   {
@@ -104,7 +104,7 @@
     "longitude": -79.281944,
     "phone": "905-472-7373",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.oakvalleyhealth.ca/emergency-wait-times-at-markham-stouffville-hospital",
     "defaultWaitTime": 120
   },
   {
@@ -116,7 +116,7 @@
     "longitude": -79.126389,
     "phone": "905-852-9771",
     "services": ["Emergency"],
-    "waitTimeUrl": "",
+    "waitTimeUrl": "https://www.oakvalleyhealth.ca/emergency-wait-times-at-uxbridge-hospital",
     "defaultWaitTime": 120
   },
   {
