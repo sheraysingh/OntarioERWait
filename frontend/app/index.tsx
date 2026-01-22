@@ -150,12 +150,11 @@ export default function Index() {
         await getUserLocationAndFetchHospitals();
       } else {
         setLoading(false);
-        setShowPostalCodeInput(true);
+        // Don't automatically show postal code input, let user choose
       }
     } catch (error) {
       console.error('Error requesting location permission:', error);
       setLoading(false);
-      setShowPostalCodeInput(true);
     }
   };
 
