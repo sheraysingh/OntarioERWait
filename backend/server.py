@@ -349,6 +349,10 @@ async def get_nearby_hospitals(
     # Calculate distance and score for each hospital
     results = []
     for h in hospitals:
+        # Skip hospitals with null coordinates
+        if h["coordinates"]["lat"] is None or h["coordinates"]["lng"] is None:
+            continue
+            
         distance = calculate_distance(
             lat, lng,
             h["coordinates"]["lat"],
