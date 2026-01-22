@@ -717,6 +717,18 @@ const styles = StyleSheet.create({
     color: '#0066CC',
     fontWeight: '600',
   },
+  areaNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  areaNameText: {
+    fontSize: 14,
+    color: '#DC2626',
+    marginLeft: 6,
+    fontWeight: '600',
+  },
   subtitle: {
     fontSize: 14,
     color: '#6B7280',
