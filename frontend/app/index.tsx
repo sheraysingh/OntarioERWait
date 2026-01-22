@@ -467,15 +467,14 @@ export default function Index() {
           )}
         </View>
         <View style={styles.statItem}>
-          <Ionicons name="time-outline" size={20} color={getWaitTimeColor(item.currentWaitTime)} />
-          {item.currentWaitTime ? (
+          <Ionicons name="time-outline" size={20} color={item.currentWaitTime && item.currentWaitTime > 0 ? getWaitTimeColor(item.currentWaitTime) : "#9CA3AF"} />
+          {item.currentWaitTime && item.currentWaitTime > 0 ? (
             <Text style={[styles.statLabel, { color: getWaitTimeColor(item.currentWaitTime) }]}>
               {formatWaitTime(item.currentWaitTime)} wait
             </Text>
           ) : (
             <View style={styles.naContainer}>
-              <Ionicons name="close-circle" size={16} color="#9CA3AF" />
-              <Text style={styles.statValueNA}>Wait time N/A</Text>
+              <Text style={styles.statValueNA}>Data not available</Text>
             </View>
           )}
         </View>
