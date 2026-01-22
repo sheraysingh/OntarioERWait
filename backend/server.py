@@ -10,6 +10,7 @@ from typing import List, Optional
 from datetime import datetime
 from math import radians, cos, sin, asin, sqrt
 from bson import ObjectId
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +19,9 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# OpenRouteService API key
+ORS_API_KEY = os.environ.get('OPENROUTESERVICE_API_KEY', '')
 
 # Create the main app without a prefix
 app = FastAPI()
