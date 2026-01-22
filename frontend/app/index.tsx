@@ -218,7 +218,7 @@ export default function Index() {
         accuracy: Location.Accuracy.Balanced,
       });
       setUserLocation(location);
-      await fetchNearbyHospitals(location.coords.latitude, location.coords.longitude);
+      await initializeLocation(location.coords.latitude, location.coords.longitude);
     } catch (error) {
       console.error('Error getting location:', error);
       Alert.alert('Error', 'Unable to get your current location');
@@ -246,7 +246,7 @@ export default function Index() {
       setUserLocation(location);
       setLocationSource('postal');
       setShowPostalCodeInput(false);
-      await fetchNearbyHospitals(coordinates.lat, coordinates.lng);
+      await initializeLocation(coordinates.lat, coordinates.lng);
     } else {
       setLoading(false);
       Alert.alert('Error', 'Unable to find coordinates for this postal code. Please try again.');
