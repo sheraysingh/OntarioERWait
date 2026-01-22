@@ -138,24 +138,12 @@ async function geocodePostalCode(postalCode: string): Promise<Coordinates | null
   }
 }
 
-// Reverse geocode coordinates to get area name
+// Reverse geocode coordinates to get area name with neighborhood
 async function reverseGeocode(lat: number, lng: number): Promise<string> {
   try {
-    // Try using expo-location first (mobile only)
-    if (Platform.OS !== 'web' && Location) {
-      const result = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
-      if (result && result.length > 0) {
-        const location = result[0];
-        const parts = [];
-        if (location.city) parts.push(location.city);
-        if (location.district || location.subregion) parts.push(location.district || location.subregion);
-        return parts.join(' - ') || 'Unknown Area';
-      }
-    }
-    
-    // Fallback to Nominatim for web or if expo-location fails
+    // Try Nominatim for web or as fallback
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
     );
     
     if (!response.ok) {
@@ -166,12 +154,32 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
     
     if (data && data.address) {
       const parts = [];
-      if (data.address.city || data.address.town || data.address.village) {
-        parts.push(data.address.city || data.address.town || data.address.village);
+      
+      // Get city
+      const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
+      if (city) parts.push(city);
+      
+      // Get neighborhood/suburb
+      const neighborhood = data.address.suburb || data.address.neighbourhood || data.address.quarter;
+      if (neighborhood && neighborhood !== city) {
+        parts.push(neighborhood);
       }
-      if (data.address.suburb || data.address.neighbourhood) {
-        parts.push(data.address.suburb || data.address.neighbourhood);
+      
+      // If we have city, add region for context
+      if (parts.length === 1 && city) {
+        // For Brampton specifically, add directional based on coordinates
+        if (city.toLowerCase() === 'brampton') {
+          // Brampton center is approximately 43.7315° N, 79.7624° W
+          const isNorth = lat > 43.71;
+          const isWest = lng < -79.78;
+          
+          if (isNorth && isWest) parts.push('Northwest');
+          else if (isNorth && !isWest) parts.push('Northeast');
+          else if (!isNorth && isWest) parts.push('Southwest');
+          else parts.push('Southeast');
+        }
       }
+      
       return parts.join(' - ') || 'Unknown Area';
     }
     
