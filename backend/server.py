@@ -320,16 +320,18 @@ async def calculate_travel_time(
     try:
         async with httpx.AsyncClient() as client:
             headers = {
-                "Authorization": ORS_API_KEY,
-                "Content-Type": "application/json"
+                "Accept": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8"
             }
             
             payload = {
                 "coordinates": [[start_lng, start_lat], [end_lng, end_lat]]
             }
             
+            # Add API key as query parameter (OpenRouteService method)
+            url = f"https://api.openrouteservice.org/v2/directions/driving-car?api_key={ORS_API_KEY}"
+            
             response = await client.post(
-                "https://api.openrouteservice.org/v2/directions/driving-car",
+                url,
                 json=payload,
                 headers=headers,
                 timeout=10.0
