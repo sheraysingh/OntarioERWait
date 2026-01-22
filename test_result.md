@@ -128,39 +128,48 @@ backend:
 
   - task: "GET /api/hospitals - Get all hospitals"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Returns list of all hospitals with complete information"
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Returns exactly 10 hospitals with correct data structure. All required fields present: id, name, address, city, coordinates (lat/lng), currentWaitTime, phone, services. Response format is correct."
 
   - task: "GET /api/hospitals/nearby - Get nearby hospitals with ranking"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Accepts lat, lng, limit, distance_weight, wait_weight params. Calculates distance using Haversine formula. Ranks hospitals by combined score of distance and wait time. Returns sorted list with top N results."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: All functionality working perfectly. Distance calculation accurate using Haversine formula. Ranking algorithm correctly combines distance and wait time with configurable weights. Results properly sorted by score (lower=better). Tested with Toronto/Ottawa coordinates, various limits (1,5,10), and different weight parameters. Parameter validation working (422 for missing params)."
 
   - task: "GET /api/hospitals/:id - Get hospital by ID"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Returns detailed information for a specific hospital by ID"
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Returns correct hospital data for valid IDs. Handles invalid ID formats with 400 error. Minor: Non-existent valid ObjectIds return 400 instead of 404 due to exception handling, but core functionality works correctly."
 
 frontend:
   - task: "Location permission handling"
