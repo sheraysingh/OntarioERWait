@@ -691,6 +691,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginLeft: 6,
+    flex: 1,
+  },
+  changeLocationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  changeLocationText: {
+    fontSize: 12,
+    color: '#0066CC',
+    fontWeight: '600',
   },
   subtitle: {
     fontSize: 14,
