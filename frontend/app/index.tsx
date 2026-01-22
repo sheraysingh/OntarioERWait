@@ -469,6 +469,13 @@ export default function Index() {
           <Text style={styles.locationText}>
             {locationSource === 'gps' ? 'Using GPS location' : `Using postal code: ${postalCode}`}
           </Text>
+          <TouchableOpacity
+            style={styles.changeLocationButton}
+            onPress={() => setShowPostalCodeInput(true)}
+          >
+            <Ionicons name="pencil" size={16} color="#0066CC" />
+            <Text style={styles.changeLocationText}>Change</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.subtitle}>Top {hospitals.length} Emergency Rooms</Text>
@@ -488,6 +495,70 @@ export default function Index() {
           </View>
         </View>
       </View>
+
+      {showPostalCodeInput && (
+        <View style={styles.postalCodeModal}>
+          <View style={styles.postalCodeModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Change Location</Text>
+              <TouchableOpacity onPress={() => setShowPostalCodeInput(false)}>
+                <Ionicons name="close-circle" size={32} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.locationOptionsContainer}>
+              {Platform.OS !== 'web' && (
+                <TouchableOpacity
+                  style={styles.locationOptionButton}
+                  onPress={async () => {
+                    setShowPostalCodeInput(false);
+                    setLoading(true);
+                    await requestLocationPermission();
+                  }}
+                >
+                  <Ionicons name="navigate" size={24} color="#0066CC" />
+                  <Text style={styles.locationOptionText}>Use GPS Location</Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.orDivider}>
+                <View style={styles.orLine} />
+                <Text style={styles.orText}>OR</Text>
+                <View style={styles.orLine} />
+              </View>
+
+              <Text style={styles.postalCodeLabel}>Enter Ontario Postal Code:</Text>
+              <TextInput
+                style={styles.postalCodeInput}
+                placeholder="K1A 0B1"
+                value={postalCode}
+                onChangeText={setPostalCode}
+                autoCapitalize="characters"
+                maxLength={7}
+              />
+              
+              <TouchableOpacity
+                style={styles.postalCodeButton}
+                onPress={async () => {
+                  await handlePostalCodeSubmit();
+                  if (!loading) {
+                    setShowPostalCodeInput(false);
+                  }
+                }}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <>
+                    <Ionicons name="search" size={20} color="white" />
+                    <Text style={styles.postalCodeButtonText}>Find Hospitals</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       {selectedHospital && (
         <View style={styles.detailModal}>
