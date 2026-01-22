@@ -78,6 +78,10 @@ export default function Index() {
   const [userLocation, setUserLocation] = useState<any | null>(null);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>('combined');
+  const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
+  const [postalCode, setPostalCode] = useState('');
+  const [locationSource, setLocationSource] = useState<'gps' | 'postal' | null>(null);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
