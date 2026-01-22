@@ -46,12 +46,25 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [userLocation, setUserLocation] = useState<any | null>(null);
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
-    requestLocationPermission();
+    if (Platform.OS === 'web') {
+      // Use default Toronto location for web
+      const defaultLocation = {
+        coords: {
+          latitude: 43.6532,
+          longitude: -79.3832,
+        },
+      };
+      setUserLocation(defaultLocation);
+      setLocationPermission(true);
+      fetchNearbyHospitals(defaultLocation.coords.latitude, defaultLocation.coords.longitude);
+    } else {
+      requestLocationPermission();
+    }
   }, []);
 
   const requestLocationPermission = async () => {
