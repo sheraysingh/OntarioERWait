@@ -552,7 +552,7 @@ export default function Index() {
           </View>
         )}
 
-        <Text style={styles.subtitle}>Top {hospitals.length} Emergency Rooms</Text>
+        <Text style={styles.subtitle}>Top 5 Emergency Rooms</Text>
         
         <View style={styles.sortContainer}>
           <Text style={styles.sortLabel}>Sort by:</Text>
