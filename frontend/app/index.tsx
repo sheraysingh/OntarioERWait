@@ -392,62 +392,13 @@ export default function Index() {
     </TouchableOpacity>
   );
 
-  if (loading && !showPostalCodeInput) {
+  if (loading && !showPostalCodeInput && !userLocation) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0066CC" />
           <Text style={styles.loadingText}>Finding nearby emergency rooms...</Text>
         </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (showPostalCodeInput) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.postalCodeContainer}
-        >
-          <Ionicons name="location-outline" size={64} color="#9CA3AF" />
-          <Text style={styles.postalCodeTitle}>Location Access Required</Text>
-          <Text style={styles.postalCodeText}>
-            Please enter your Ontario postal code to find nearby emergency rooms.
-          </Text>
-          
-          <TextInput
-            style={styles.postalCodeInput}
-            placeholder="K1A 0B1"
-            value={postalCode}
-            onChangeText={setPostalCode}
-            autoCapitalize="characters"
-            maxLength={7}
-          />
-          
-          <TouchableOpacity
-            style={styles.postalCodeButton}
-            onPress={handlePostalCodeSubmit}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <>
-                <Ionicons name="search" size={20} color="white" />
-                <Text style={styles.postalCodeButtonText}>Find Hospitals</Text>
-              </>
-            )}
-          </TouchableOpacity>
-
-          {Platform.OS !== 'web' && (
-            <TouchableOpacity
-              style={styles.retryGPSButton}
-              onPress={requestLocationPermission}
-            >
-              <Text style={styles.retryGPSText}>Try GPS Again</Text>
-            </TouchableOpacity>
-          )}
-        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
