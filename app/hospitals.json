@@ -718,6 +718,5 @@
     "services": ["Emergency"],
     "waitTimeUrl": "",
     "defaultWaitTime": 120
-  }
-  // ... (additional rural/small sites like Almonte, Arnprior, Hawkesbury, Kemptville, Deep River, Haliburton, Minden, Glengarry, St Francis Barry's Bay, North Hastings Bancroft, Prince Edward Picton, etc., can be added in the same format if needed — the pattern is identical, with address/city from official data where available)
+  }  
 ]
