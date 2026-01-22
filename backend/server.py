@@ -299,6 +299,78 @@ async def get_hospital_by_id(hospital_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@api_router.post("/calculate-travel-time")
+async def calculate_travel_time(
+    start_lat: float = Query(..., description="Starting latitude"),
+    start_lng: float = Query(..., description="Starting longitude"),
+    end_lat: float = Query(..., description="Destination latitude"),
+    end_lng: float = Query(..., description="Destination longitude")
+):
+    """Calculate real driving time using OpenRouteService API"""
+    if not ORS_API_KEY:
+        # Fallback to estimation if no API key
+        distance = calculate_distance(start_lat, start_lng, end_lat, end_lng)
+        estimated_time = round((distance / 40) * 60)  # 40 km/h average
+        return {
+            "duration": estimated_time,
+            "distance": distance,
+            "source": "estimated"
+        }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            headers = {
+                "Authorization": ORS_API_KEY,
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "coordinates": [[start_lng, start_lat], [end_lng, end_lat]]
+            }
+            
+            response = await client.post(
+                "https://api.openrouteservice.org/v2/directions/driving-car",
+                json=payload,
+                headers=headers,
+                timeout=10.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                route = data["routes"][0]
+                summary = route["summary"]
+                
+                # Duration in seconds, convert to minutes
+                duration_minutes = round(summary["duration"] / 60)
+                # Distance in meters, convert to km
+                distance_km = round(summary["distance"] / 1000, 2)
+                
+                return {
+                    "duration": duration_minutes,
+                    "distance": distance_km,
+                    "source": "openrouteservice"
+                }
+            else:
+                # Fallback to estimation on error
+                distance = calculate_distance(start_lat, start_lng, end_lat, end_lng)
+                estimated_time = round((distance / 40) * 60)
+                return {
+                    "duration": estimated_time,
+                    "distance": distance,
+                    "source": "estimated_fallback"
+                }
+                
+    except Exception as e:
+        logger.error(f"OpenRouteService API error: {str(e)}")
+        # Fallback to estimation
+        distance = calculate_distance(start_lat, start_lng, end_lat, end_lng)
+        estimated_time = round((distance / 40) * 60)
+        return {
+            "duration": estimated_time,
+            "distance": distance,
+            "source": "estimated_fallback"
+        }
+
 # Include the router in the main app
 app.include_router(api_router)
 
