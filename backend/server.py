@@ -37,8 +37,8 @@ api_router = APIRouter(prefix="/api")
 
 # Pydantic Models
 class Coordinates(BaseModel):
-    lat: float
-    lng: float
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 class Hospital(BaseModel):
     id: Optional[str] = None
