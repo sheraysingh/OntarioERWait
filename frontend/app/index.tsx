@@ -171,11 +171,20 @@ export default function Index() {
       setUserLocation(defaultLocation);
       setLocationPermission(true);
       setLocationSource('gps');
-      fetchNearbyHospitals(defaultLocation.coords.latitude, defaultLocation.coords.longitude);
+      initializeLocation(defaultLocation.coords.latitude, defaultLocation.coords.longitude);
     } else {
       requestLocationPermission();
     }
   }, []);
+
+  const initializeLocation = async (lat: number, lng: number) => {
+    // Get area name
+    const area = await reverseGeocode(lat, lng);
+    setAreaName(area);
+    
+    // Fetch hospitals
+    await fetchNearbyHospitals(lat, lng);
+  };
 
   // Re-sort when sort mode changes
   useEffect(() => {
