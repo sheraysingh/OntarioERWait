@@ -346,6 +346,66 @@ async def get_hospital_by_id(hospital_id: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@api_router.post("/hospitals/sync")
+async def sync_hospitals_from_source():
+    """Sync hospital list from GitHub JSON or local file"""
+    global hospital_cache_timestamp
+    
+    try:
+        hospital_data = None
+        
+        # Try to load from GitHub URL if configured
+        if HOSPITAL_JSON_URL and HOSPITAL_JSON_URL.startswith('http'):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(HOSPITAL_JSON_URL, timeout=10.0)
+                    if response.status_code == 200:
+                        hospital_data = response.json()
+                        logger.info(f"Loaded {len(hospital_data)} hospitals from GitHub")
+            except Exception as e:
+                logger.error(f"Error loading from GitHub: {str(e)}")
+        
+        # Fallback to local file
+        if not hospital_data:
+            local_path = ROOT_DIR / 'hospitals.json'
+            if local_path.exists():
+                import json
+                with open(local_path, 'r') as f:
+                    hospital_data = json.load(f)
+                logger.info(f"Loaded {len(hospital_data)} hospitals from local file")
+        
+        if not hospital_data:
+            raise HTTPException(status_code=500, detail="No hospital data source available")
+        
+        # Clear existing hospitals
+        await db.hospitals.delete_many({})
+        
+        # Insert new hospitals
+        hospitals_to_insert = []
+        for h in hospital_data:
+            hospitals_to_insert.append({
+                "name": h["name"],
+                "address": h["address"],
+                "city": h["city"],
+                "coordinates": {"lat": h["latitude"], "lng": h["longitude"]},
+                "currentWaitTime": h.get("defaultWaitTime", 120),
+                "lastUpdated": datetime.utcnow(),
+                "phone": h["phone"],
+                "services": h["services"]
+            })
+        
+        await db.hospitals.insert_many(hospitals_to_insert)
+        hospital_cache_timestamp = datetime.utcnow()
+        
+        return {
+            "message": f"Successfully synced {len(hospitals_to_insert)} hospitals",
+            "timestamp": hospital_cache_timestamp
+        }
+        
+    except Exception as e:
+        logger.error(f"Error syncing hospitals: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/calculate-travel-time")
 async def calculate_travel_time(
     start_lat: float = Query(..., description="Starting latitude"),
