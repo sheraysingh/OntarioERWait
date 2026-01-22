@@ -483,6 +483,13 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
+        {areaName && (
+          <View style={styles.areaNameContainer}>
+            <Ionicons name="location" size={16} color="#DC2626" />
+            <Text style={styles.areaNameText}>{areaName}</Text>
+          </View>
+        )}
+
         <Text style={styles.subtitle}>Top {hospitals.length} Emergency Rooms</Text>
         
         <View style={styles.sortContainer}>
